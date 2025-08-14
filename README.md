@@ -1,59 +1,103 @@
 # QMK Userspace
 
-This is a template repository which allows for an external set of QMK keymaps to be defined and compiled. This is useful for users who want to maintain their own keymaps without having to fork the main QMK repository.
+This is a QMK userspace directory which allows setting keyboards that use QMK keymaps to be defined and compiled.
 
-## Howto configure your build targets
+Currently included keyboards and features:
+
+- Xiudi XD60 Rev3 with VIA support and a custom keymap (carlosedp). Layout here: ![Carlosedp's Layout](https://i.imgur.com/lvEqSvU.png)
+
+## Quickstart: Setting Up QMK Locally and Building Your Firmware
+
+1. **Install QMK CLI**
+   - Follow the [QMK CLI installation guide](https://docs.qmk.fm/#/newbs_getting_started?id=qmk-cli) or run:
+
+     ```sh
+     # If uv is not installed, install it first
+     curl -LsSf https://astral.sh/uv/install.sh | sh
+     # Then install QMK CLI
+     uv tool install qmk
+     qmk setup -H $HOME/repos/qmk_firmware
+     ```
+
+   - This will clone the QMK firmware repo and set up the environment.
+
+2. **Clone Your Userspace Config**
+   - Clone this repository (your userspace config) to your machine:
+
+     ```sh
+     git clone https://github.com/carlosedp/qmk_userspace.git
+     cd qmk_userspace
+     ```
+
+3. **Configure QMK to Use Your Userspace**
+   - Set the userspace overlay directory:
+
+     ```sh
+     qmk config user.overlay_dir="$(realpath .)"
+     ```
+
+   - This makes your keymaps and settings available to QMK.
+
+4. **Build Your Firmware**
+   - Compile for your keyboard and keymap (replace with your values):
+
+     ```sh
+     qmk compile -kb xiudi/xd60/rev3 -km carlosedp
+     ```
+
+   - The resulting firmware file will be in the `qmk_userspace` directory, typically under `xiudi_xd60_rev3_carlosedp.hex` in the case of xd60 keyboard.
+
+## Configuring Your Layout in VIA
+
+1. **Open VIA**
+   - Download and install [VIA](https://usevia.app/) if you haven't already.
+
+2. **Load the VIA JSON**
+   - In VIA, go to the Settings tab and enable "Show Design Tab".
+   - In the "Design" tab and use the "Load Draft Definition" option.
+   - Select the file: `keyboards/xiudi/xd60/rev3/XD60_VIA.json` from this repository.
+
+3. **Connect Your Keyboard**
+   - Plug in your keyboard with the new firmware flashed.
+   - VIA should automatically detect it. If not, ensure the correct JSON is loaded and the firmware supports VIA.
+
+4. **Customize Your Layout**
+   - In the "Configure" tab, first define your layout for the "Shift Row" and "Bottom Row" sections.
+   - Use VIA's interface to remap keys, layers, and lighting as desired.
+
+---
+
+## Configuring and adding new keymaps
 
 1. Run the normal `qmk setup` procedure if you haven't already done so -- see [QMK Docs](https://docs.qmk.fm/#/newbs) for details.
-1. Fork this repository
-1. Clone your fork to your local machine
-1. Enable userspace in QMK config using `qmk config user.overlay_dir="$(realpath qmk_userspace)"`
-1. Add a new keymap for your board using `qmk new-keymap`
-    * This will create a new keymap in the `keyboards` directory, in the same location that would normally be used in the main QMK repository. For example, if you wanted to add a keymap for the Planck, it will be created in `keyboards/planck/keymaps/<your keymap name>`
-    * You can also create a new keymap using `qmk new-keymap -kb <your_keyboard> -km <your_keymap>`
-    * Alternatively, add your keymap manually by placing it in the location specified above.
-    * `layouts/<layout name>/<your keymap name>/keymap.*` is also supported if you prefer the layout system
-1. Add your keymap(s) to the build by running `qmk userspace-add -kb <your_keyboard> -km <your_keymap>`
-    * This will automatically update your `qmk.json` file
-    * Corresponding `qmk userspace-remove -kb <your_keyboard> -km <your_keymap>` will delete it
-    * Listing the build targets can be done with `qmk userspace-list`
-1. Commit your changes
+2. Enable userspace in QMK config using `qmk config user.overlay_dir="$(realpath qmk_userspace)"`
+3. Add a new keymap for your board using `qmk new-keymap`
+    - This will create a new keymap in the `keyboards` directory, in the same location that would normally be used in the main QMK repository. For example, if you wanted to add a keymap for the Planck, it will be created in `keyboards/planck/keymaps/<your keymap name>`
+    - You can also create a new keymap using `qmk new-keymap -kb <your_keyboard> -km <your_keymap>`
+    - Alternatively, add your keymap manually by placing it in the location specified above.
+    - `layouts/<layout name>/<your keymap name>/keymap.*` is also supported if you prefer the layout system
+4. Add your keymap(s) to the build by running `qmk userspace-add -kb <your_keyboard> -km <your_keymap>`
+    - This will automatically update your `qmk.json` file
+    - Corresponding `qmk userspace-remove -kb <your_keyboard> -km <your_keymap>` will delete it
+    - Listing the build targets can be done with `qmk userspace-list`
+5. Commit your changes
 
-## Howto build with GitHub
+## Building your firmware
 
-1. In the GitHub Actions tab, enable workflows
-1. Push your changes above to your forked GitHub repository
-1. Look at the GitHub Actions for a new actions run
-1. Wait for the actions run to complete
-1. Inspect the Releases tab on your repository for the latest firmware build
+1. Run `qmk compile -kb <your_keyboard> -km <your_keymap>` to build your firmware
+    - The resulting firmware file will be in the `qmk_userspace` directory, typically under `<keyboard>_<keymap>.hex`
+    - For example, if you built for the Planck with a keymap named `mykeymap`, the file would be `planck_mykeymap.hex`
 
-## Howto build locally
+## Flashing Your Firmware
 
-1. Run the normal `qmk setup` procedure if you haven't already done so -- see [QMK Docs](https://docs.qmk.fm/#/newbs) for details.
-1. Fork this repository
-1. Clone your fork to your local machine
-1. `cd` into this repository's clone directory
-1. Set global userspace path: `qmk config user.overlay_dir="$(realpath .)"` -- you MUST be located in the cloned userspace location for this to work correctly
-    * This will be automatically detected if you've `cd`ed into your userspace repository, but the above makes your userspace available regardless of your shell location.
-1. Compile normally: `qmk compile -kb your_keyboard -km your_keymap` or `make your_keyboard:your_keymap`
+1. Connect your keyboard to your computer via USB.
+2. Put your keyboard into bootloader mode. This usually involves pressing a specific key combination or a physical reset button on the keyboard. Refer to your keyboard's documentation for the exact method.
+3. Use the QMK CLI to flash the firmware:
 
-Alternatively, if you configured your build targets above, you can use `qmk userspace-compile` to build all of your userspace targets at once.
+   ```sh
+    qmk flash -kb <your_keyboard> -km <your_keymap>
+    ```
 
-## Extra info
+    - This command will compile (if necessary) and flash the firmware to your keyboard.
 
-If you wish to point GitHub actions to a different repository, a different branch, or even a different keymap name, you can modify `.github/workflows/build_binaries.yml` to suit your needs.
-
-To override the `build` job, you can change the following parameters to use a different QMK repository or branch:
-```
-    with:
-      qmk_repo: qmk/qmk_firmware
-      qmk_ref: master
-```
-
-If you wish to manually manage `qmk_firmware` using git within the userspace repository, you can add `qmk_firmware` as a submodule in the userspace directory instead. GitHub Actions will automatically use the submodule at the pinned revision if it exists, otherwise it will use the default latest revision of `qmk_firmware` from the main repository.
-
-This can also be used to control which fork is used, though only upstream `qmk_firmware` will have support for external userspace until other manufacturers update their forks.
-
-1. (First time only) `git submodule add https://github.com/qmk/qmk_firmware.git`
-1. (To update) `git submodule update --init --recursive`
-1. Commit your changes to your userspace repository
+If running on Windows WSL2, qmk cli doesn't access the USB device directly. You can flash using Windows QMK Toolbox which can be downloaded from <https://github.com/qmk/qmk_toolbox/releases>.
