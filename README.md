@@ -5,6 +5,7 @@ This is a QMK userspace directory which allows setting keyboards that use QMK ke
 Currently included keyboards and features:
 
 - **Xiudi XD60 Rev3** with VIA support and custom keymap (carlosedp). Layout: ![Carlosedp's Layout](img/xd60_layout.png)
+- **Monsgeek M1 V5 US** with custom keymap (carlosedp).
 
 ## Quickstart: Setting Up QMK Locally and Building Your Firmware
 
