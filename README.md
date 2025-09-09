@@ -22,7 +22,15 @@ Currently included keyboards and features:
 
    - This will clone the QMK firmware repo and set up the environment.
 
-2. **Clone Your Userspace Config**
+2. **Clone QMK repo with updated M1 V5 and set it as default firmware**
+
+    ```sh
+    git clone https://github.com//xethlyx/qmk_firmware_m1v5
+    cd qmk_firmware
+    qmk config user.qmk_home="$(realpath .)"
+    cd ..
+
+3. **Clone Your Userspace Config**
    - Clone this repository (your userspace config) to your machine:
 
      ```sh
@@ -30,7 +38,7 @@ Currently included keyboards and features:
      cd qmk_userspace
      ```
 
-3. **Configure QMK to Use Your Userspace**
+4. **Configure QMK to Use Your Userspace**
    - Set the userspace overlay directory:
 
      ```sh
@@ -39,7 +47,7 @@ Currently included keyboards and features:
 
    - This makes your keymaps and settings available to QMK.
 
-4. **Build Your Firmware**
+5. **Build Your Firmware**
    - Compile for your keyboard and keymap (replace with your values):
 
      ```sh
