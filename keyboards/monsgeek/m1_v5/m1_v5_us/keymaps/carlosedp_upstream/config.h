@@ -1,0 +1,16 @@
+#undef DEBOUNCE
+#define DEBOUNCE 10
+
+#undef TAPPING_TERM
+#define TAPPING_TERM 140
+
+#undef MD_BT1_NAME
+#undef MD_BT2_NAME
+#undef MD_BT3_NAME
+#define MD_BT1_NAME "M1 V5-1"
+#define MD_BT2_NAME "M1 V5-2"
+#define MD_BT3_NAME "M1 V5-3"
+
+// Set TYPING HEATMAP as default RGB matrix effect
+#undef RGB_MATRIX_DEFAULT_MODE
+#define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_TYPING_HEATMAP
