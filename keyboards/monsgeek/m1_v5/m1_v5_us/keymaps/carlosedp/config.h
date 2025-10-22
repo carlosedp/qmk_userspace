@@ -69,3 +69,19 @@
 #define ENABLE_RGB_MATRIX_STARLIGHT_DUAL_SAT
 #define ENABLE_RGB_MATRIX_RIVERFLOW
 #define ENABLE_RGB_MATRIX_EFFECT_MAX
+
+// Battery indication thresholds and colors
+// Green if > 50%, Yellow if <= 50% and > 20%, Red if <= 20%
+#undef IM_BAT_REQ_LEVEL1_VAL
+#undef IM_BAT_REQ_LEVEL2_VAL
+#undef IM_BAT_REQ_LEVEL3_VAL
+#define IM_BAT_REQ_LEVEL1_VAL 51  // >=51% => green
+#define IM_BAT_REQ_LEVEL2_VAL 21  // 21-50% => yellow
+#define IM_BAT_REQ_LEVEL3_VAL 0   // <=20%  => red (fallback)
+
+#undef IM_BAT_REQ_LEVEL1_COLOR
+#undef IM_BAT_REQ_LEVEL2_COLOR
+#undef IM_BAT_REQ_LEVEL3_COLOR
+#define IM_BAT_REQ_LEVEL1_COLOR 0x00, 0xFF, 0x00 // green
+#define IM_BAT_REQ_LEVEL2_COLOR 0xFF, 0xFF, 0x00 // yellow
+#define IM_BAT_REQ_LEVEL3_COLOR 0xFF, 0x00, 0x00 // red

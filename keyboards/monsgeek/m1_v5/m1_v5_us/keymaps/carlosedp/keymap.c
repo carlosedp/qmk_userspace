@@ -83,6 +83,8 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 bool            rk_bat_req_flag;
 bool            rgb_was_enabled_before_bat_check;
 bool            rgb_was_enabled_before_wls_blink;
+bool            rgb_was_enabled_before_low_batt;
+bool            low_battery_active;
 static uint32_t last_wls_blink_state = 0;
 
 uint32_t blink_timer;
@@ -184,6 +186,25 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 // Ensure the connection-mode blink indicator works even when RGB is toggled off.
 // This hook runs regardless of the rgb_matrix enable state.
 void housekeeping_task_user(void) {
+    // Persistently indicate low battery by forcing RGB on and powering LEDs
+    uint8_t bat_pct = *md_getp_bat();
+    if (bat_pct <= 20) {
+        if (!low_battery_active) {
+            rgb_was_enabled_before_low_batt = rgb_matrix_is_enabled();
+            gpio_write_pin_high(LED_POWER_EN_PIN);
+            rgb_matrix_enable_noeeprom();
+            low_battery_active = true;
+        }
+    } else {
+        if (low_battery_active) {
+            if (!rgb_was_enabled_before_low_batt) {
+                rgb_matrix_disable_noeeprom();
+                gpio_write_pin_low(LED_POWER_EN_PIN);
+            }
+            low_battery_active = false;
+        }
+    }
+
     // Handle wireless connection blink indicator
     if (wls_rgb_indicator_timer) {
         if (!last_wls_blink_state) {
@@ -196,7 +217,7 @@ void housekeeping_task_user(void) {
     } else {
         if (last_wls_blink_state) {
             // Blink just finished - restore RGB state
-            if (!rgb_was_enabled_before_wls_blink) {
+            if (!rgb_was_enabled_before_wls_blink && !low_battery_active) {
                 rgb_matrix_disable_noeeprom();
                 gpio_write_pin_low(LED_POWER_EN_PIN);
             }
@@ -246,6 +267,22 @@ bool rgb_matrix_indicators_user() {
             rgb_matrix_set_color(59, 0xFF, 0xFF, 0xFF);
         } else {
             rgb_matrix_set_color(59, 0x00, 0x00, 0x00);
+        }
+    }
+
+    // Overlay: when low battery is active, blink the battery bar indices red
+    if (low_battery_active) {
+        uint8_t bat = *md_getp_bat();
+        uint8_t mi_index[10] = RGB_MATRIX_BAT_INDEX_MAP;
+        bool on = ((timer_read32() / 500) % 2) == 0; // 500ms blink cadence
+        for (uint8_t i = 0; i < 10; i++) {
+            if ((i < (bat / 10)) || (i < 1)) {
+                if (on) {
+                    rgb_matrix_set_color(mi_index[i], 0xFF, 0x00, 0x00);
+                } else {
+                    rgb_matrix_set_color(mi_index[i], 0x00, 0x00, 0x00);
+                }
+            }
         }
     }
 
