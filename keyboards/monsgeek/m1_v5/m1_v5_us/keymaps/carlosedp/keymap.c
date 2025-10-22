@@ -219,10 +219,18 @@ void housekeeping_task_user(void) {
             // Blink just finished - restore RGB state
             if (!rgb_was_enabled_before_wls_blink && !low_battery_active) {
                 rgb_matrix_disable_noeeprom();
-                gpio_write_pin_low(LED_POWER_EN_PIN);
             }
         }
         last_wls_blink_state = 0;
+    }
+
+    // Keep LED power in sync with current needs so RGB_TOG can turn LEDs back on after a blink
+    // Power is required if any of these are true: low battery overlay, wireless blink active, or RGB is enabled
+    bool need_led_power = low_battery_active || (wls_rgb_indicator_timer != 0) || rgb_matrix_is_enabled();
+    if (need_led_power) {
+        gpio_write_pin_high(LED_POWER_EN_PIN);
+    } else {
+        gpio_write_pin_low(LED_POWER_EN_PIN);
     }
 }
 
@@ -272,9 +280,9 @@ bool rgb_matrix_indicators_user() {
 
     // Overlay: when low battery is active, blink the battery bar indices red
     if (low_battery_active) {
-        uint8_t bat = *md_getp_bat();
+        uint8_t bat          = *md_getp_bat();
         uint8_t mi_index[10] = RGB_MATRIX_BAT_INDEX_MAP;
-        bool on = ((timer_read32() / 500) % 2) == 0; // 500ms blink cadence
+        bool    on           = ((timer_read32() / 500) % 2) == 0; // 500ms blink cadence
         for (uint8_t i = 0; i < 10; i++) {
             if ((i < (bat / 10)) || (i < 1)) {
                 if (on) {

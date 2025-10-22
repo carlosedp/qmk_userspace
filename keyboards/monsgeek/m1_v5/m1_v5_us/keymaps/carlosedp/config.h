@@ -75,9 +75,9 @@
 #undef IM_BAT_REQ_LEVEL1_VAL
 #undef IM_BAT_REQ_LEVEL2_VAL
 #undef IM_BAT_REQ_LEVEL3_VAL
-#define IM_BAT_REQ_LEVEL1_VAL 51  // >=51% => green
-#define IM_BAT_REQ_LEVEL2_VAL 21  // 21-50% => yellow
-#define IM_BAT_REQ_LEVEL3_VAL 0   // <=20%  => red (fallback)
+#define IM_BAT_REQ_LEVEL1_VAL 51 // >=51% => green
+#define IM_BAT_REQ_LEVEL2_VAL 21 // 21-50% => yellow
+#define IM_BAT_REQ_LEVEL3_VAL 0  // <=20%  => red (fallback)
 
 #undef IM_BAT_REQ_LEVEL1_COLOR
 #undef IM_BAT_REQ_LEVEL2_COLOR
