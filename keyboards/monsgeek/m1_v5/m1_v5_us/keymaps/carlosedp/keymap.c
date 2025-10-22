@@ -5,6 +5,9 @@
 #include "wls/wls.h"
 #include QMK_KEYBOARD_H
 
+// External variable to track wireless connection blink
+extern uint32_t wls_rgb_indicator_timer;
+
 enum layers {
     _BL = 0,
     _FL,
@@ -77,7 +80,15 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 
 // clang-format on
 
-bool rk_bat_req_flag;
+bool            rk_bat_req_flag;
+bool            rgb_was_enabled_before_bat_check;
+bool            rgb_was_enabled_before_wls_blink;
+static uint32_t last_wls_blink_state = 0;
+
+uint32_t blink_timer;
+void     m1v5_blink(void) {
+    blink_timer = timer_read32();
+}
 
 #define KEEP_AWAKE_KEY KC_LSFT
 #define KEEP_AWAKE_INTERVAL 5000
@@ -127,7 +138,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     keep_awake_timer = 0;
                     delayed_exec     = INVALID_DEFERRED_TOKEN;
                 } else {
-                    delayed_exec     = defer_exec(KEEP_AWAKE_INTERVAL, keep_awake_callback, NULL);
+                    delayed_exec = defer_exec(KEEP_AWAKE_INTERVAL, keep_awake_callback, NULL);
                     if (delayed_exec != INVALID_DEFERRED_TOKEN) keep_awake_timer = timer_read();
                 }
                 return false;
@@ -137,15 +148,79 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         } break;
 
         case HS_BATQ: {
+            if (record->event.pressed) {
+                // Save current RGB state
+                rgb_was_enabled_before_bat_check = rgb_matrix_is_enabled();
+                gpio_write_pin_high(LED_POWER_EN_PIN); // Enable LED power to show battery
+                rgb_matrix_enable_noeeprom();          // Enable RGB matrix temporarily
+            } else {
+                // Restore previous RGB state
+                if (!rgb_was_enabled_before_bat_check) {
+                    rgb_matrix_disable_noeeprom();
+                    gpio_write_pin_low(LED_POWER_EN_PIN);
+                }
+            }
             rk_bat_req_flag = record->event.pressed;
             return false;
+        } break;
+
+        // Start/refresh the wireless indicator blink on connection mode switches
+        case KC_BT1:
+        case KC_BT2:
+        case KC_BT3:
+        case KC_2G4:
+        case KC_USB: {
+            if (record->event.pressed) {
+                // Kick the blink timer so the user sees immediate feedback
+                hs_rgb_blink_set_timer(timer_read32());
+            }
+            return true; // allow the key to be processed normally
         } break;
     }
 
     return true;
 }
 
+// Ensure the connection-mode blink indicator works even when RGB is toggled off.
+// This hook runs regardless of the rgb_matrix enable state.
+void housekeeping_task_user(void) {
+    // Handle wireless connection blink indicator
+    if (wls_rgb_indicator_timer) {
+        if (!last_wls_blink_state) {
+            // Blink just started - save RGB state and enable
+            rgb_was_enabled_before_wls_blink = rgb_matrix_is_enabled();
+            gpio_write_pin_high(LED_POWER_EN_PIN);
+            rgb_matrix_enable_noeeprom();
+        }
+        last_wls_blink_state = 1;
+    } else {
+        if (last_wls_blink_state) {
+            // Blink just finished - restore RGB state
+            if (!rgb_was_enabled_before_wls_blink) {
+                rgb_matrix_disable_noeeprom();
+                gpio_write_pin_low(LED_POWER_EN_PIN);
+            }
+        }
+        last_wls_blink_state = 0;
+    }
+}
+
 bool rgb_matrix_indicators_user() {
+    // NOTE: Wireless indicator enable/restore is handled in housekeeping_task_user
+
+    if (blink_timer) {
+        if ((timer_elapsed32(blink_timer) / 250) % 2 == 0) {
+            rgb_matrix_set_color_all(0xFF, 0xFF, 0xFF);
+        } else {
+            rgb_matrix_set_color_all(0x00, 0x00, 0x00);
+        }
+
+        if (timer_elapsed32(blink_timer) > 1250) {
+            blink_timer = 0;
+        }
+        return false;
+    }
+
     if (rk_bat_req_flag) {
         rgb_matrix_set_color_all(0x00, 0x00, 0x00);
         for (uint8_t i = 0; i < 10; i++) {
