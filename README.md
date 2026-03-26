@@ -22,13 +22,14 @@ Currently included keyboards and features:
 
    - This will clone the QMK firmware repo and set up the environment.
 
-2. **Clone QMK repo with updated M1 V5 and set it as default firmware**
+2. **Clone QMK repo fork and set it as default firmware**
 
     ```sh
-    git clone https://github.com//xethlyx/qmk_firmware_m1v5
+    git clone https://github.com/carlosedp/qmk_firmware
     cd qmk_firmware
     qmk config user.qmk_home="$(realpath .)"
     cd ..
+    ```
 
 3. **Clone Your Userspace Config**
    - Clone this repository (your userspace config) to your machine:

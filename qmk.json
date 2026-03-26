@@ -2,7 +2,18 @@
     "userspace_version": "1.1",
     "build_targets": [
         ["xiudi/xd60/rev3", "carlosedp"],
-        ["xiudi/xd60/rev3", "via"],
-        ["monsgeek/m1_v5/m1_v5_us", "carlosedp"]
+        ["xiudi/xd60/rev3", "default"],
+        ["epomaker/th40", "default"],
+        ["epomaker/luma40", "carlosedp"],
+        ["epomaker/luma40", "default"],
+        ["monsgeek/m1_v5/m1_v5_us", "default"],
+        ["monsgeek/m1_v5/m1_v5_us", "carlosedp"],
+        ["evoworks/evo80", "default"],
+        ["epomaker/galaxy68", "default"],
+        ["chosfox/geonixr2", "default"],
+        ["chosfox/vero75", "default"],
+        ["epomaker/luma84", "default"],
+        ["epomaker/split65", "default"],
+        ["epomaker/split65", "carlosedp"]
     ]
 }
