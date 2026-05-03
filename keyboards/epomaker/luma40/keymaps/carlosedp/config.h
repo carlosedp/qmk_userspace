@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define DYNAMIC_KEYMAP_LAYER_COUNT 5
+
 // Custom configuration
 // LUMA40 mode indicator LED indices - using keys that should be visible
 #undef LED_BLE_1_INDEX
